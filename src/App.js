@@ -94,14 +94,14 @@ function App() {
             onClick={() => setView('decks')}
             title="My Decks"
           >
-            👩‍💻
+            D
           </button>
           <button
             className={`nav-button ${view === 'shared' ? 'active' : ''}`}
             onClick={() => setView('shared')}
             title="Community Decks"
           >
-            🌐
+            C
           </button>
         </nav>
       )}

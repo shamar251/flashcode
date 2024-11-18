@@ -37,6 +37,7 @@
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
+  height: 45%;
   font-size: 1rem;
   transition: all 0.3s ease;
 }

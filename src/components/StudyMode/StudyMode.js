@@ -225,7 +225,7 @@ const StudyMode = ({ userId, deckId }) => {
   if (!cards.length) {
     return (
       <div className="study-mode">
-        <h2>All Caught Up! 🎉</h2>
+        <h2>All Caught Up!</h2>
         <p className="challenge-description">No cards are due for review at this time. Check back later!</p>
       </div>
     );
@@ -261,7 +261,7 @@ const StudyMode = ({ userId, deckId }) => {
 
       <div className="editor-section">
         <div className="editor-header">
-          <span>Code Editor</span>
+          <span></span>
           <div className="editor-actions">
             <button className="hint-button" onClick={showNextHint}>
               Hint
