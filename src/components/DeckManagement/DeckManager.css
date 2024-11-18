@@ -30,9 +30,9 @@
   box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.2);
 }
 
-.create-deck button {
+.create-deck .auth-button {
   padding: 0.75rem 1.5rem;
-  background: var(--accent-teal);
+  background: var(--accent-primary);
   color: white;
   border: none;
   border-radius: var(--border-radius);
@@ -41,8 +41,8 @@
   transition: all 0.3s ease;
 }
 
-.create-deck button:hover {
-  background: var(--accent-teal-hover);
+.create-deck .auth-button:hover {
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 
@@ -193,12 +193,12 @@
 }
 
 .deck-success-rate {
-  color: var(--accent-teal);
+  color: var(--accent-primary);
   font-weight: 500;
   font-size: 0.9rem;
   padding: 0.25rem 0.75rem;
   border-radius: var(--border-radius);
-  background: rgba(77, 182, 172, 0.1);
+  background: rgba(4, 131, 182, 0.1);
   white-space: nowrap;
 }
 

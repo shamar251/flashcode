@@ -6,13 +6,14 @@
   --text-primary: #ffffff;
   --text-secondary: #a0a0a0;
   --accent-primary: #0483b6;
-  --accent-hover: #9277ff;
+  --accent-hover: #0484b6e3;
   --danger: #ff4d4f;
   --danger-hover: #ff7875;
   --success: #52c41a;
   --border-radius: 12px;
   --transition: all 0.3s ease;
   --header-height: 70px;
+  --side-panel-width: 80px;
 }
 
 * {
@@ -32,6 +33,46 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Side Panel styles */
+.side-panel {
+  position: fixed;
+  left: 0;
+  top: var(--header-height);
+  bottom: 0;
+  width: var(--side-panel-width);
+  background-color: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  z-index: 900;
+}
+
+.nav-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--bg-tertiary);
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.nav-button:hover {
+  background-color: var(--accent-primary);
+  transform: scale(1.05);
+}
+
+.nav-button.active {
+  background-color: var(--accent-primary);
 }
 
 /* Header styles */
@@ -70,21 +111,21 @@ body {
   flex: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 2rem 2rem calc(var(--side-panel-width) + 2rem);
   width: 100%;
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Footer styles */
+/* Rest of the existing styles... */
 .app-footer {
   background-color: var(--bg-secondary);
   padding: 1.5rem;
   text-align: center;
   color: var(--text-secondary);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+  margin-left: var(--side-panel-width);
 }
 
-/* Authentication styles */
 .auth-container {
   max-width: 400px;
   margin: 2rem auto;
@@ -264,6 +305,7 @@ body {
 
   .app-main {
     padding: 1rem;
+    padding-left: calc(var(--side-panel-width) + 1rem);
   }
 
   .mode-selector {

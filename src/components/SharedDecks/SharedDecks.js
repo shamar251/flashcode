@@ -36,42 +36,76 @@ const SharedDecks = ({ userId, onBack }) => {
   const loadSharedDecks = async () => {
     try {
       setLoading(true);
+      setError('');
       let sharedDecksRef = collection(db, 'sharedDecks');
-      let constraints = [];
+      let q;
 
+      // Create query based on filters and sort
       if (selectedLanguage) {
-        constraints.push(where('language', '==', selectedLanguage));
+        switch (sortBy) {
+          case 'popularity':
+            q = query(
+              sharedDecksRef,
+              where('language', '==', selectedLanguage),
+              orderBy('likes', 'desc'),
+              orderBy('__name__', 'desc')
+            );
+            break;
+          case 'recent':
+            q = query(
+              sharedDecksRef,
+              where('language', '==', selectedLanguage),
+              orderBy('createdAt', 'desc'),
+              orderBy('__name__', 'desc')
+            );
+            break;
+          case 'imports':
+            q = query(
+              sharedDecksRef,
+              where('language', '==', selectedLanguage),
+              orderBy('imports', 'desc'),
+              orderBy('__name__', 'desc')
+            );
+            break;
+          default:
+            q = query(
+              sharedDecksRef,
+              where('language', '==', selectedLanguage),
+              orderBy('likes', 'desc'),
+              orderBy('__name__', 'desc')
+            );
+        }
+      } else {
+        // If no language filter, just sort
+        switch (sortBy) {
+          case 'popularity':
+            q = query(sharedDecksRef, orderBy('likes', 'desc'));
+            break;
+          case 'recent':
+            q = query(sharedDecksRef, orderBy('createdAt', 'desc'));
+            break;
+          case 'imports':
+            q = query(sharedDecksRef, orderBy('imports', 'desc'));
+            break;
+          default:
+            q = query(sharedDecksRef, orderBy('likes', 'desc'));
+        }
       }
 
-      let sortConstraint;
-      switch (sortBy) {
-        case 'popularity':
-          sortConstraint = orderBy('likes', 'desc');
-          break;
-        case 'recent':
-          sortConstraint = orderBy('createdAt', 'desc');
-          break;
-        case 'imports':
-          sortConstraint = orderBy('imports', 'desc');
-          break;
-        default:
-          sortConstraint = orderBy('likes', 'desc');
-      }
-      constraints.push(sortConstraint);
-
-      const q = query(sharedDecksRef, ...constraints);
       const snapshot = await getDocs(q);
-
       const loadedDecks = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
 
       setDecks(loadedDecks);
-      setError('');
     } catch (error) {
       console.error('Error loading shared decks:', error);
-      setError('Failed to load shared decks');
+      if (error.code === 'failed-precondition') {
+        setError('This query requires a new database index. Please try again in a few minutes while the index is being created.');
+      } else {
+        setError('Failed to load shared decks. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }

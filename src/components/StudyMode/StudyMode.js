@@ -15,6 +15,8 @@ const StudyMode = ({ userId, deckId }) => {
   const [stats, setStats] = useState(null);
   const [deckName, setDeckName] = useState('');
   const [error, setError] = useState('');
+  const [showHint, setShowHint] = useState(false);
+  const [hintLevel, setHintLevel] = useState(0);
 
   useEffect(() => {
     if (userId && deckId) {
@@ -74,6 +76,8 @@ const StudyMode = ({ userId, deckId }) => {
 
   useEffect(() => {
     loadCardStats();
+    setHintLevel(0);
+    setShowHint(false);
   }, [currentCardIndex, cards]);
 
   const handleAnswer = async (wasSuccessful) => {
@@ -81,15 +85,22 @@ const StudyMode = ({ userId, deckId }) => {
     try {
       await srs.updateCardProgress(deckId, currentCard.id, wasSuccessful);
 
-      setFeedback(wasSuccessful ? 'Correct! Well done!' : 'Not quite right. Try again!');
+      if (wasSuccessful) {
+        setFeedback('Correct! 🎉');
+      } else {
+        setFeedback('Try again');
+      }
+
       setTimeout(() => {
         setFeedback('');
         if (wasSuccessful) {
           handleNext();
           setShowAnswer(false);
           setUserCode('');
+          setHintLevel(0);
+          setShowHint(false);
         }
-      }, 1500);
+      }, 2000);
     } catch (error) {
       console.error('Error updating progress:', error);
       setError('Failed to update progress');
@@ -98,19 +109,12 @@ const StudyMode = ({ userId, deckId }) => {
 
   const normalizeCode = (code) => {
     return code
-      // Remove all whitespace
       .replace(/\s+/g, '')
-      // Remove all comments (both single and multi-line)
       .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-      // Normalize function declarations
       .replace(/function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g, 'function')
-      // Normalize variable declarations
       .replace(/(?:let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g, 'let')
-      // Remove semicolons
       .replace(/;/g, '')
-      // Remove parentheses in simple cases
       .replace(/\(\)/g, '')
-      // Convert to lowercase
       .toLowerCase();
   };
 
@@ -118,33 +122,21 @@ const StudyMode = ({ userId, deckId }) => {
     const currentCard = cards[currentCardIndex];
 
     try {
-      // First try exact match after normalization
       const normalizedUserCode = normalizeCode(userCode);
       const normalizedSolution = normalizeCode(currentCard.solution);
-
-      // Check if the codes are equivalent after normalization
       let isCorrect = normalizedUserCode === normalizedSolution;
 
       if (!isCorrect) {
-        // If not exact match, try to evaluate the code behavior
         try {
-          // Create a sandbox environment to test both codes
           const createSandbox = (code) => {
             let sandbox = {};
-            // Add any necessary global objects or functions needed for testing
             const context = {
               console: { log: (...args) => sandbox.output.push(args) },
-              Array: Array,
-              Object: Object,
-              String: String,
-              Number: Number,
-              Boolean: Boolean,
-              Math: Math,
+              Array, Object, String, Number, Boolean, Math,
             };
 
             sandbox.output = [];
 
-            // Execute the code in the sandbox
             const fn = new Function('context', `
               with(context) {
                 ${code}
@@ -161,16 +153,13 @@ const StudyMode = ({ userId, deckId }) => {
             return sandbox;
           };
 
-          // Execute both solutions in sandbox
           const userResult = createSandbox(userCode);
           const solutionResult = createSandbox(currentCard.solution);
 
-          // Compare outputs
           isCorrect = JSON.stringify(userResult.output) === JSON.stringify(solutionResult.output) &&
             !userResult.error && !solutionResult.error;
         } catch (e) {
           console.error('Error evaluating code behavior:', e);
-          // If behavior evaluation fails, fall back to normalized comparison
           isCorrect = false;
         }
       }
@@ -183,12 +172,35 @@ const StudyMode = ({ userId, deckId }) => {
     }
   };
 
+  const showNextHint = () => {
+    setShowHint(true);
+    setHintLevel(prev => Math.min(prev + 1, 3));
+  };
+
+  const getHint = () => {
+    const currentCard = cards[currentCardIndex];
+    const solution = currentCard.solution;
+
+    switch (hintLevel) {
+      case 1:
+        return `Think about using: ${solution.match(/\b\w+(?=\s*\()/g)?.join(', ')}`;
+      case 2:
+        return `Structure: ${solution.replace(/[a-zA-Z0-9]/g, '_')}`;
+      case 3:
+        return `First line: ${solution.split('\n')[0]}`;
+      default:
+        return 'Need a hint?';
+    }
+  };
+
   const handleNext = () => {
     if (currentCardIndex < cards.length - 1) {
       setCurrentCardIndex(currentCardIndex + 1);
       setShowAnswer(false);
       setUserCode('');
       setError('');
+      setHintLevel(0);
+      setShowHint(false);
     } else {
       loadDeckAndCards();
       setCurrentCardIndex(0);
@@ -201,6 +213,8 @@ const StudyMode = ({ userId, deckId }) => {
       setShowAnswer(false);
       setUserCode('');
       setError('');
+      setHintLevel(0);
+      setShowHint(false);
     }
   };
 
@@ -218,35 +232,51 @@ const StudyMode = ({ userId, deckId }) => {
   }
 
   const currentCard = cards[currentCardIndex];
-  const progressPercentage = ((currentCardIndex + 1) / cards.length) * 100;
 
   return (
     <div className="study-mode">
-      {stats && (
-        <div className="card-stats">
-          <h2>{deckName}</h2>
-          <div className="stat-item success-stat">
-            <div className="stat-label">Success</div>
-            <div className="stat-value">{stats.successRate}%</div>
-          </div>
+      <div className="study-header">
+        <div className="header-left">
+          <button onClick={handlePrevious} disabled={currentCardIndex === 0}>←</button>
+          <h2>{currentCard.title}</h2>
+          <button onClick={handleNext} disabled={currentCardIndex === cards.length - 1}>→</button>
         </div>
-      )}
-
-      <div className="card-progress">
-        <div className="progress-indicator">
-          <span>{currentCardIndex + 1} / {cards.length}</span>
-        </div>
-        <div className="progress-bar">
-          <div
-            className="progress-fill"
-            style={{ width: `${progressPercentage}%` }}
-          />
+        <div className="header-right">
+          {stats && (
+            <div className="success-rate">
+              Success Rate: {stats.successRate}%
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="card-content">
-        <h3>{currentCard.title}</h3>
-        <p className="challenge-description">{currentCard.description}</p>
+      <div className="problem-description">
+        <p>{currentCard.description}</p>
+        {showHint && (
+          <div className="hint">
+            <p>{getHint()}</p>
+          </div>
+        )}
+      </div>
+
+      <div className="editor-section">
+        <div className="editor-header">
+          <span>Code Editor</span>
+          <div className="editor-actions">
+            <button className="hint-button" onClick={showNextHint}>
+              Hint
+            </button>
+            <button
+              className="submit-button"
+              onClick={showAnswer ? () => {
+                setShowAnswer(false);
+                setUserCode('');
+              } : checkCodeSolution}
+            >
+              {showAnswer ? 'Try Again' : 'Submit'}
+            </button>
+          </div>
+        </div>
 
         <CodeEditor
           code={showAnswer ? currentCard.solution : userCode}
@@ -255,42 +285,11 @@ const StudyMode = ({ userId, deckId }) => {
           placeholder="Write your solution here..."
         />
 
-        <button
-          className="auth-button"
-          onClick={showAnswer ? () => {
-            setShowAnswer(false);
-            setUserCode('');
-          } : checkCodeSolution}
-        >
-          {showAnswer ? 'Try Again' : 'Check Solution'}
-        </button>
-
-        {showAnswer && (
-          <div className="solution">
-            <h4>Solution:</h4>
-          </div>
-        )}
-
         {feedback && (
           <div className={`feedback ${feedback.includes('Correct') ? 'success' : 'error'}`}>
             {feedback}
           </div>
         )}
-      </div>
-
-      <div className="navigation-controls">
-        <button
-          onClick={handlePrevious}
-          disabled={currentCardIndex === 0}
-        >
-          Previous
-        </button>
-        <button
-          onClick={handleNext}
-          disabled={currentCardIndex === cards.length - 1}
-        >
-          Next
-        </button>
       </div>
     </div>
   );

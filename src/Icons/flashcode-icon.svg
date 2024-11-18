@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Base card shape -->
+    <rect x="6" y="8" width="20" height="16" rx="2" 
+        stroke="url(#cardGradient)" 
+        stroke-width="2" 
+        fill="var(--bg-secondary, #2c2d31)"/>
+    
+    <!-- Code transformation effect -->
+    <path d="M11 14L8 16L11 18" 
+        stroke="#0483b6" 
+        stroke-width="2" 
+        stroke-linecap="round" 
+        stroke-linejoin="round">
+        <animate attributeName="opacity" values="0;1;1" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <path d="M21 14L24 16L21 18" 
+        stroke="#9277ff" 
+        stroke-width="2" 
+        stroke-linecap="round" 
+        stroke-linejoin="round">
+        <animate attributeName="opacity" values="0;1;1" dur="3s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Spaced repetition orbit -->
+    <path d="M16 4C20 4 24.5 6 26 12C27.5 18 24 24 16 24" 
+        stroke="url(#orbitGradient)" 
+        stroke-width="2" 
+        stroke-linecap="round"
+        fill="none">
+        <animate attributeName="stroke-dasharray" values="0,100;100,0" dur="3s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Memory pulse -->
+    <circle cx="16" cy="16" r="2" fill="url(#pulseGradient)">
+        <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Gradients -->
+    <defs>
+        <linearGradient id="cardGradient" x1="6" y1="8" x2="26" y2="24">
+            <stop offset="0%" stop-color="#0483b6"/>
+            <stop offset="100%" stop-color="#9277ff"/>
+        </linearGradient>
+        <linearGradient id="orbitGradient" x1="16" y1="4" x2="26" y2="24">
+            <stop offset="0%" stop-color="#9277ff"/>
+            <stop offset="100%" stop-color="#0483b6"/>
+        </linearGradient>
+        <linearGradient id="pulseGradient" x1="14" y1="14" x2="18" y2="18">
+            <stop offset="0%" stop-color="#0483b6"/>
+            <stop offset="100%" stop-color="#9277ff"/>
+        </linearGradient>
+    </defs>
+</svg>

@@ -6,6 +6,7 @@ import DeckManager from './components/DeckManagement/DeckManager';
 import StudyMode from './components/StudyMode/StudyMode';
 import SharedDecks from './components/SharedDecks/SharedDecks';
 import userIcon from './Icons/user.svg';
+import { ReactComponent as FlashCodeIcon } from './Icons/flashcode-icon.svg';
 import './styles/main.css';
 import './styles/App.css';
 
@@ -64,15 +65,10 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="header-left">
-          <h1>FlashCode</h1>
-          {user && view === 'decks' && (
-            <button
-              className="community-button"
-              onClick={() => setView('shared')}
-            >
-              Community Decks
-            </button>
-          )}
+          <div className="logo">
+            <FlashCodeIcon className="app-icon" />
+            <h1>FlashCode</h1>
+          </div>
         </div>
         {user && (
           <div className="user-controls">
@@ -91,6 +87,25 @@ function App() {
         )}
       </header>
 
+      {user && (
+        <nav className="side-panel">
+          <button
+            className={`nav-button ${view === 'decks' ? 'active' : ''}`}
+            onClick={() => setView('decks')}
+            title="My Decks"
+          >
+            👩‍💻
+          </button>
+          <button
+            className={`nav-button ${view === 'shared' ? 'active' : ''}`}
+            onClick={() => setView('shared')}
+            title="Community Decks"
+          >
+            🌐
+          </button>
+        </nav>
+      )}
+
       <main className="app-main">
         {!user ? (
           <Auth />
@@ -104,12 +119,12 @@ function App() {
             )}
             {view === 'study' && (
               <>
-                <button
+                {/* <button
                   onClick={handleBackToDecks}
                   className="auth-button back-button"
                 >
                   ← Back to Decks
-                </button>
+                </button> */}
                 <StudyMode
                   userId={user.uid}
                   deckId={selectedDeck}
@@ -126,9 +141,9 @@ function App() {
         )}
       </main>
 
-      <footer className="app-footer">
+      {/* <footer className="app-footer">
         <p>FlashCode - Learn coding through spaced repetition</p>
-      </footer>
+      </footer> */}
     </div>
   );
 }

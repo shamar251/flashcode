@@ -12,32 +12,63 @@
   align-items: center;
 }
 
-.app-header h1 {
-  margin: 0;
-  color: var(--text-primary);
-  font-size: 1.5rem;
-}
-
 .header-left {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-icon {
+  width: 32px;
+  height: 32px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.app-header h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  background: linear-gradient(120deg, var(--accent-primary), #9277ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
 .community-button {
-  background: #7C5CFF;
+  background: linear-gradient(120deg, var(--accent-primary), #9277ff);
   color: white;
   border: none;
   padding: 0.5rem 1.5rem;
-  border-radius: 2rem;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(4, 131, 182, 0.2);
 }
 
 .community-button:hover {
-  background: #6B4FE0;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(4, 131, 182, 0.3);
 }
 
 .user-controls {
@@ -45,7 +76,7 @@
 }
 
 .user-icon-btn {
-  background: #7C5CFF;
+  background: linear-gradient(120deg, var(--accent-primary), #77b0ff);
   border: none;
   width: 36px;
   height: 36px;
@@ -56,11 +87,12 @@
   justify-content: center;
   transition: all 0.3s ease;
   padding: 0;
+  box-shadow: 0 2px 8px rgba(4, 131, 182, 0.2);
 }
 
 .user-icon-btn:hover {
-  background: #6B4FE0;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(4, 131, 182, 0.3);
 }
 
 .user-icon-btn img {
@@ -172,7 +204,7 @@
 }
 
 .auth-button:hover {
-  background: var(--accent-primary-hover);
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 

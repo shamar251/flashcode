@@ -132,10 +132,11 @@ const DeckEditor = ({ userId, deckId, onBack }) => {
 
   return (
     <div className="deck-editor">
+      <button className="back-button" onClick={onBack}>
+        ← Back to Decks
+      </button>
       <div className="editor-header">
-        <button className="back-button" onClick={onBack}>
-          ← Back to Decks
-        </button>
+
 
         <div className="deck-settings">
           <div className="settings-row">
