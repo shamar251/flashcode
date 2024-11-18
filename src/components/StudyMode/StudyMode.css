@@ -1,0 +1,329 @@
+:root {
+  --accent-teal: #3795BD;
+  --accent-hover-teal: #3795BD;
+}
+
+.study-mode-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.back-button {
+  margin-bottom: 1rem;
+  background: var(--accent-teal);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-button:hover {
+  background: var(--accent-hover-teal);
+  transform: translateY(-1px);
+}
+
+.study-mode {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.study-mode h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--accent-teal);
+  text-align: center;
+}
+
+.mode-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.25rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius);
+}
+
+.mode-selector button {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.mode-selector button.active {
+  background: var(--accent-teal);
+  color: white;
+  box-shadow: 0 2px 8px rgba(77, 182, 172, 0.25);
+}
+
+.mode-selector button:hover:not(.active) {
+  color: var(--text-primary);
+  background: rgba(77, 182, 172, 0.1);
+}
+
+.stats-and-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius);
+}
+
+.card-stats {
+  display: flex;
+  flex-direction: space-between;
+  gap: 0.75rem;
+  flex: 2;
+  justify-content: flex-end;
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  align-items: right;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(77, 182, 172, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stat-item.success-stat {
+  flex: 0.15;
+  margin-left: auto;
+}
+
+.stat-item:hover {
+  border-color: var(--accent-teal);
+  background: rgba(77, 182, 172, 0.05);
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  margin-left: auto;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-teal);
+}
+
+.card-progress {
+  flex: 1;
+  margin: 0;
+}
+
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.progress-bar {
+  height: 4px;
+  background: rgba(77, 182, 172, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent-teal);
+  transition: width 0.3s ease;
+}
+
+.card-content {
+  background: var(--bg-tertiary);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-content h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.challenge-description {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--accent-teal);
+}
+
+.code-editor {
+  margin: 1rem 0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--bg-primary);
+}
+
+.code-editor .cm-editor {
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  height: 200px;
+  background-color: var(--bg-primary);
+  padding: 0.75rem;
+}
+
+.solution {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--accent-teal);
+}
+
+.navigation-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.navigation-controls button {
+  min-width: 120px;
+  padding: 0.75rem 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  background: var(--accent-teal);
+  border: none;
+  border-radius: var(--border-radius);
+  color: white;
+  cursor: pointer;
+}
+
+.navigation-controls button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(77, 182, 172, 0.25);
+  background: var(--accent-hover-teal);
+}
+
+.navigation-controls button:disabled {
+  background: var(--bg-tertiary);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-button {
+  background: var(--accent-teal);
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.auth-button:hover:not(:disabled) {
+  background: var(--accent-hover-teal);
+  transform: translateY(-1px);
+}
+
+.auth-button:disabled {
+  background: var(--bg-tertiary);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.feedback {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  text-align: center;
+  font-weight: 500;
+  animation: fadeInUp 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.feedback.success {
+  background: rgba(82, 196, 26, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(82, 196, 26, 0.3);
+}
+
+.feedback.error {
+  background: rgba(255, 77, 79, 0.15);
+  color: var(--danger);
+  border: 1px solid rgba(255, 77, 79, 0.3);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .study-mode-container {
+    padding: 0 0.5rem;
+  }
+
+  .study-mode {
+    padding: 0.75rem;
+  }
+
+  .study-mode h2 {
+    font-size: 1.25rem;
+  }
+
+  .stats-and-progress {
+    flex-direction: column;
+  }
+
+  .card-stats {
+    width: 100%;
+  }
+
+  .mode-selector {
+    flex-direction: column;
+  }
+
+  .navigation-controls {
+    flex-direction: column;
+  }
+
+  .navigation-controls button {
+    width: 100%;
+  }
+}

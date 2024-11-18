@@ -1,0 +1,226 @@
+.deck-manager {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.deck-manager h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+}
+
+.create-deck {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.create-deck input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.create-deck input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.2);
+}
+
+.create-deck button {
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-teal);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.create-deck button:hover {
+  background: var(--accent-teal-hover);
+  transform: translateY(-1px);
+}
+
+.import-deck {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+}
+
+.import-deck label {
+  color: var(--text-secondary);
+  margin-left: 1rem;
+}
+
+.deck-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+}
+
+.deck-item {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.deck-list:not(.has-open-dropdown) .deck-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.deck-item.active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.deck-header {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.deck-dropdown {
+  position: relative;
+  margin-right: 0.5rem;
+}
+
+.options-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.options-button:hover {
+  color: var(--text-primary);
+}
+
+.options-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 150px;
+  margin-top: 0.5rem;
+}
+
+.dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: var(--bg-tertiary);
+  transform-origin: center;
+  rotate: 45deg;
+  z-index: -1;
+}
+
+.dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.dropdown-menu button:hover {
+  background: var(--bg-secondary);
+}
+
+.dropdown-menu button.delete {
+  color: var(--danger);
+}
+
+.dropdown-menu button.delete:hover {
+  background: rgba(255, 77, 79, 0.1);
+}
+
+.deck-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.deck-title h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.deck-language {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.deck-success-rate {
+  color: var(--accent-teal);
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--border-radius);
+  background: rgba(77, 182, 172, 0.1);
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .create-deck {
+    flex-direction: column;
+  }
+
+  .deck-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .deck-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .deck-success-rate {
+    width: 100%;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+}
