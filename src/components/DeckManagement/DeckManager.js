@@ -1,23 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase/firebaseConfig';
-import { collection, addDoc, getDocs, doc, deleteDoc, query, orderBy, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, deleteDoc, query, where, getDoc, updateDoc } from 'firebase/firestore';
 import DeckEditor from './DeckEditor';
+import DeckCollection from './DeckCollection';
 import SpacedRepetition from '../SRS/SpacedRepetition';
 import './DeckManager.css';
 import { ReactComponent as OptionsIcon } from '../../Icons/cil--options.svg';
 
 const DeckManager = ({ userId, onStartStudying }) => {
   const [decks, setDecks] = useState([]);
+  const [collections, setCollections] = useState([]);
   const [newDeckName, setNewDeckName] = useState('');
+  const [newCollectionName, setNewCollectionName] = useState('');
   const [selectedDeck, setSelectedDeck] = useState(null);
+  const [selectedCollection, setSelectedCollection] = useState(null);
   const [importFile, setImportFile] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [srs] = useState(new SpacedRepetition(userId));
   const [deckStats, setDeckStats] = useState({});
+  const [isCollectionsCollapsed, setIsCollectionsCollapsed] = useState(true);
+
+  useEffect(() => {
+    loadCollections();
+  }, [userId]);
 
   useEffect(() => {
     loadDecks();
-  }, [userId]);
+  }, [userId, selectedCollection]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -29,6 +38,119 @@ const DeckManager = ({ userId, onStartStudying }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const loadCollections = async () => {
+    try {
+      const collectionsRef = collection(db, `users/${userId}/collections`);
+      const snapshot = await getDocs(collectionsRef);
+      const loadedCollections = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setCollections(loadedCollections);
+    } catch (error) {
+      console.error('Error loading collections:', error);
+    }
+  };
+
+  const moveDeckToCollection = async (deckId, newCollectionId) => {
+    try {
+      const deckRef = doc(db, `users/${userId}/decks/${deckId}`);
+      const deckDoc = await getDoc(deckRef);
+      const oldCollectionId = deckDoc.data()?.collectionId;
+
+      // Update deck's collection
+      await updateDoc(deckRef, {
+        collectionId: newCollectionId || null,
+        updatedAt: new Date().toISOString()
+      });
+
+      // Update old collection count if it exists
+      if (oldCollectionId) {
+        const oldCollectionRef = doc(db, `users/${userId}/collections/${oldCollectionId}`);
+        const oldCollectionDoc = await getDoc(oldCollectionRef);
+        await updateDoc(oldCollectionRef, {
+          deckCount: Math.max(0, (oldCollectionDoc.data()?.deckCount || 0) - 1)
+        });
+      }
+
+      // Update new collection count if moving to a collection
+      if (newCollectionId) {
+        const newCollectionRef = doc(db, `users/${userId}/collections/${newCollectionId}`);
+        const newCollectionDoc = await getDoc(newCollectionRef);
+        await updateDoc(newCollectionRef, {
+          deckCount: (newCollectionDoc.data()?.deckCount || 0) + 1
+        });
+      }
+
+      loadDecks();
+      loadCollections();
+      setOpenDropdown(null);
+    } catch (error) {
+      console.error('Error moving deck:', error);
+    }
+  };
+
+  const createCollection = async () => {
+    if (!newCollectionName.trim()) return;
+
+    try {
+      const collectionsRef = collection(db, `users/${userId}/collections`);
+      await addDoc(collectionsRef, {
+        name: newCollectionName,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        deckCount: 0
+      });
+      setNewCollectionName('');
+      loadCollections();
+    } catch (error) {
+      console.error('Error creating collection:', error);
+    }
+  };
+
+  const deleteCollection = async (collectionId) => {
+    try {
+      // Move all decks in the collection to uncategorized
+      const decksRef = collection(db, `users/${userId}/decks`);
+      const q = query(decksRef, where('collectionId', '==', collectionId));
+      const snapshot = await getDocs(q);
+
+      // Update each deck to remove the collectionId
+      const updatePromises = snapshot.docs.map(deckDoc =>
+        updateDoc(doc(db, `users/${userId}/decks/${deckDoc.id}`), {
+          collectionId: null,
+          updatedAt: new Date().toISOString()
+        })
+      );
+
+      await Promise.all(updatePromises);
+
+      // Delete the collection itself
+      await deleteDoc(doc(db, `users/${userId}/collections/${collectionId}`));
+
+      loadCollections();
+      if (selectedCollection === collectionId) {
+        setSelectedCollection(null);
+      }
+      loadDecks();
+    } catch (error) {
+      console.error('Error deleting collection:', error);
+    }
+  };
+
+  const renameCollection = async (collectionId, newName) => {
+    try {
+      const collectionRef = doc(db, `users/${userId}/collections/${collectionId}`);
+      await updateDoc(collectionRef, {
+        name: newName,
+        updatedAt: new Date().toISOString()
+      });
+      loadCollections();
+    } catch (error) {
+      console.error('Error renaming collection:', error);
+    }
+  };
 
   const loadDeckStats = async (deckId) => {
     try {
@@ -58,16 +180,37 @@ const DeckManager = ({ userId, onStartStudying }) => {
   const loadDecks = async () => {
     try {
       const decksRef = collection(db, `users/${userId}/decks`);
-      const q = query(decksRef, orderBy('updatedAt', 'desc'));
-      const snapshot = await getDocs(q);
-      const loadedDecks = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setDecks(loadedDecks);
+      let snapshot;
+
+      if (selectedCollection === null) {
+        // Get all decks and filter for uncategorized ones in memory
+        snapshot = await getDocs(decksRef);
+        const loadedDecks = snapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          .filter(deck => !deck.collectionId); // Keep only decks without a collectionId
+
+        // Sort by updatedAt
+        loadedDecks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        setDecks(loadedDecks);
+      } else {
+        // For a specific collection
+        const q = query(decksRef, where('collectionId', '==', selectedCollection));
+        snapshot = await getDocs(q);
+        const loadedDecks = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        // Sort by updatedAt
+        loadedDecks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        setDecks(loadedDecks);
+      }
 
       // Load stats for each deck
-      loadedDecks.forEach(deck => loadDeckStats(deck.id));
+      snapshot.docs.forEach(doc => loadDeckStats(doc.id));
     } catch (error) {
       console.error('Error loading decks:', error);
     }
@@ -78,13 +221,30 @@ const DeckManager = ({ userId, onStartStudying }) => {
 
     try {
       const decksRef = collection(db, `users/${userId}/decks`);
-      await addDoc(decksRef, {
+      const newDeck = {
         name: newDeckName,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      });
+      };
+
+      // Only add collectionId if a collection is selected
+      if (selectedCollection) {
+        newDeck.collectionId = selectedCollection;
+      }
+
+      await addDoc(decksRef, newDeck);
+
+      if (selectedCollection) {
+        const collectionRef = doc(db, `users/${userId}/collections/${selectedCollection}`);
+        const collectionDoc = await getDoc(collectionRef);
+        await updateDoc(collectionRef, {
+          deckCount: (collectionDoc.data()?.deckCount || 0) + 1
+        });
+      }
+
       setNewDeckName('');
       loadDecks();
+      loadCollections();
     } catch (error) {
       console.error('Error creating deck:', error);
     }
@@ -93,8 +253,22 @@ const DeckManager = ({ userId, onStartStudying }) => {
   const deleteDeck = async (deckId) => {
     if (!window.confirm('Are you sure you want to delete this deck?')) return;
     try {
-      await deleteDoc(doc(db, `users/${userId}/decks/${deckId}`));
+      const deckRef = doc(db, `users/${userId}/decks/${deckId}`);
+      const deckDoc = await getDoc(deckRef);
+      const collectionId = deckDoc.data()?.collectionId;
+
+      await deleteDoc(deckRef);
+
+      if (collectionId) {
+        const collectionRef = doc(db, `users/${userId}/collections/${collectionId}`);
+        const collectionDoc = await getDoc(collectionRef);
+        await updateDoc(collectionRef, {
+          deckCount: Math.max(0, (collectionDoc.data()?.deckCount || 0) - 1)
+        });
+      }
+
       loadDecks();
+      loadCollections();
       if (selectedDeck === deckId) {
         setSelectedDeck(null);
       }
@@ -107,12 +281,10 @@ const DeckManager = ({ userId, onStartStudying }) => {
     if (!window.confirm('Share this deck with the community?')) return;
 
     try {
-      // Get all cards from the deck
       const cardsRef = collection(db, `users/${userId}/decks/${deck.id}/cards`);
       const cardsSnapshot = await getDocs(cardsRef);
       const cards = cardsSnapshot.docs.map(doc => doc.data());
 
-      // Create shared deck with only defined fields
       const sharedDeckData = {
         name: deck.name,
         language: deck.language || 'Other',
@@ -125,11 +297,9 @@ const DeckManager = ({ userId, onStartStudying }) => {
         cardCount: cards.length
       };
 
-      // Create shared deck
       const sharedDecksRef = collection(db, 'sharedDecks');
       const sharedDeck = await addDoc(sharedDecksRef, sharedDeckData);
 
-      // Add all cards to shared deck
       const sharedCardsRef = collection(db, `sharedDecks/${sharedDeck.id}/cards`);
       for (const card of cards) {
         await addDoc(sharedCardsRef, {
@@ -187,11 +357,25 @@ const DeckManager = ({ userId, onStartStudying }) => {
 
         const deckName = file.name.replace(/\.[^/.]+$/, "");
         const decksRef = collection(db, `users/${userId}/decks`);
-        const deckDoc = await addDoc(decksRef, {
+        const newDeck = {
           name: deckName,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        });
+        };
+
+        if (selectedCollection) {
+          newDeck.collectionId = selectedCollection;
+        }
+
+        const deckDoc = await addDoc(decksRef, newDeck);
+
+        if (selectedCollection) {
+          const collectionRef = doc(db, `users/${userId}/collections/${selectedCollection}`);
+          const collectionDoc = await getDoc(collectionRef);
+          await updateDoc(collectionRef, {
+            deckCount: (collectionDoc.data()?.deckCount || 0) + 1
+          });
+        }
 
         const cardsRef = collection(db, `users/${userId}/decks/${deckDoc.id}/cards`);
 
@@ -211,6 +395,7 @@ const DeckManager = ({ userId, onStartStudying }) => {
         }
 
         loadDecks();
+        loadCollections();
       } catch (error) {
         console.error('Error importing deck:', error);
         alert('Error importing deck: ' + error.message);
@@ -234,7 +419,66 @@ const DeckManager = ({ userId, onStartStudying }) => {
 
   return (
     <div className="deck-manager">
-      <h2>Decks</h2>
+      <div className="collections-header">
+        <h2>Collections</h2>
+        <button
+          className={`collections-toggle ${isCollectionsCollapsed ? 'collapsed' : ''}`}
+          onClick={() => setIsCollectionsCollapsed(!isCollectionsCollapsed)}
+        >
+          ▼
+        </button>
+      </div>
+
+      <div className={`collections-section ${isCollectionsCollapsed ? 'collapsed' : ''}`}>
+        <div className="create-collection">
+          <input
+            type="text"
+            value={newCollectionName}
+            onChange={(e) => setNewCollectionName(e.target.value)}
+            placeholder="New Collection Name"
+            className="auth-input"
+          />
+          <button onClick={createCollection} className="auth-button">
+            Create Collection
+          </button>
+        </div>
+
+        <div className="collections-list">
+          <div
+            className={`deck-collection ${!selectedCollection ? 'active' : ''}`}
+            onClick={() => {
+              setSelectedCollection(null);
+              loadDecks();
+            }}
+          >
+            <div className="collection-header">
+              <div className="collection-title">
+                <h3>Uncategorized Decks</h3>
+              </div>
+            </div>
+          </div>
+
+          {collections.map(collection => (
+            <DeckCollection
+              key={collection.id}
+              collection={collection}
+              onSelect={(id) => {
+                setSelectedCollection(id);
+                loadDecks();
+              }}
+              onDelete={deleteCollection}
+              onRename={renameCollection}
+            />
+          ))}
+        </div>
+      </div>
+
+      <h2>
+        {selectedCollection
+          ? `Decks in ${collections.find(c => c.id === selectedCollection)?.name}`
+          : 'Uncategorized Decks'
+        }
+      </h2>
 
       <div className="create-deck">
         <input
@@ -304,6 +548,32 @@ const DeckManager = ({ userId, onStartStudying }) => {
                     }}>
                       Export
                     </button>
+                    <div className="move-to-collection">
+                      <button>Move to Collection</button>
+                      <div className="submenu">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveDeckToCollection(deck.id, null);
+                          }}
+                          className={!deck.collectionId ? 'active' : ''}
+                        >
+                          Uncategorized Decks
+                        </button>
+                        {collections.map(collection => (
+                          <button
+                            key={collection.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              moveDeckToCollection(deck.id, collection.id);
+                            }}
+                            className={deck.collectionId === collection.id ? 'active' : ''}
+                          >
+                            {collection.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

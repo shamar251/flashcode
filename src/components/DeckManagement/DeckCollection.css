@@ -1,0 +1,89 @@
+.deck-collection {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.deck-collection:hover {
+  background-color: #333333;
+}
+
+.collection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.collection-title {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.collection-title h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.1em;
+}
+
+.deck-count {
+  color: #888;
+  font-size: 0.9em;
+  padding: 2px 8px;
+  background-color: #222;
+  border-radius: 12px;
+}
+
+.collection-dropdown {
+  position: relative;
+}
+
+.collection-dropdown .options-button {
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  color: #888;
+}
+
+.collection-dropdown .options-button:hover {
+  color: #fff;
+}
+
+.collection-dropdown .dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: #333;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.collection-dropdown .dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.collection-dropdown .dropdown-menu button:hover {
+  background-color: #444;
+}
+
+.collection-dropdown .dropdown-menu button.delete {
+  color: #ff4444;
+}
+
+.collection-dropdown .dropdown-menu button.delete:hover {
+  background-color: #442222;
+}

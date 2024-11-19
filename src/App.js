@@ -7,6 +7,8 @@ import StudyMode from './components/StudyMode/StudyMode';
 import SharedDecks from './components/SharedDecks/SharedDecks';
 import userIcon from './Icons/user.svg';
 import { ReactComponent as FlashCodeIcon } from './Icons/flashcode-icon.svg';
+import { ReactComponent as DeckIcon } from './Icons/deck-icon.svg';
+import { ReactComponent as CommunityIcon } from './Icons/community-icon.svg';
 import './styles/main.css';
 import './styles/App.css';
 
@@ -94,14 +96,14 @@ function App() {
             onClick={() => setView('decks')}
             title="My Decks"
           >
-            D
+            <DeckIcon />
           </button>
           <button
             className={`nav-button ${view === 'shared' ? 'active' : ''}`}
             onClick={() => setView('shared')}
             title="Community Decks"
           >
-            C
+            <CommunityIcon />
           </button>
         </nav>
       )}
