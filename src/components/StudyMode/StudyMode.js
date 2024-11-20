@@ -17,6 +17,7 @@ const StudyMode = ({ userId, deckId }) => {
   const [error, setError] = useState('');
   const [showHint, setShowHint] = useState(false);
   const [hintLevel, setHintLevel] = useState(0);
+  const [hasStartedCoding, setHasStartedCoding] = useState(false);
 
   useEffect(() => {
     if (userId && deckId) {
@@ -119,6 +120,10 @@ const StudyMode = ({ userId, deckId }) => {
   };
 
   const checkCodeSolution = () => {
+    if (!userCode.trim()) {
+      return; // Don't run validation if there's no code
+    }
+
     const currentCard = cards[currentCardIndex];
 
     try {
@@ -198,6 +203,7 @@ const StudyMode = ({ userId, deckId }) => {
       setCurrentCardIndex(currentCardIndex + 1);
       setShowAnswer(false);
       setUserCode('');
+      setHasStartedCoding(false);
       setError('');
       setHintLevel(0);
       setShowHint(false);
@@ -212,10 +218,18 @@ const StudyMode = ({ userId, deckId }) => {
       setCurrentCardIndex(currentCardIndex - 1);
       setShowAnswer(false);
       setUserCode('');
+      setHasStartedCoding(false);
       setError('');
       setHintLevel(0);
       setShowHint(false);
     }
+  };
+
+  const handleEditorChange = (newCode) => {
+    if (!hasStartedCoding && newCode.trim()) {
+      setHasStartedCoding(true);
+    }
+    setUserCode(newCode);
   };
 
   if (error) {
@@ -268,19 +282,22 @@ const StudyMode = ({ userId, deckId }) => {
             </button>
             <button
               className="submit-button"
-              onClick={showAnswer ? () => {
-                setShowAnswer(false);
-                setUserCode('');
-              } : checkCodeSolution}
+              onClick={
+                showAnswer ? () => {
+                  setShowAnswer(false);
+                  setUserCode('');
+                  setHasStartedCoding(false);
+                } : !userCode.trim() && !hasStartedCoding ? () => setShowAnswer(true) : checkCodeSolution
+              }
             >
-              {showAnswer ? 'Try Again' : 'Submit'}
+              {showAnswer ? 'Try Again' : !userCode.trim() && !hasStartedCoding ? 'Show' : 'Submit'}
             </button>
           </div>
         </div>
 
         <CodeEditor
           code={showAnswer ? currentCard.solution : userCode}
-          onChange={setUserCode}
+          onChange={handleEditorChange}
           readOnly={showAnswer}
           placeholder="Write your solution here..."
         />
